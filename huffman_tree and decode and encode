@@ -1,0 +1,128 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <map>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+// 存储Huffman树的节点
+struct TreeNode {
+    char data;
+    int freq;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(char d, int f) : data(d), freq(f), left(nullptr), right(nullptr) {}
+};
+
+// 用于优先队列的比较函数
+struct CompareNodes {
+    bool operator()(const TreeNode* a, const TreeNode* b) const {
+        return a->freq > b->freq;
+    }
+};
+
+// 构建Huffman树
+TreeNode* buildHuffmanTree(map<char, int>& freqMap) {
+    priority_queue<TreeNode*, vector<TreeNode*>, CompareNodes> pq;
+
+    // 将字符和频率信息构建为叶子节点并放入优先队列
+    for (const auto& entry : freqMap) {
+        pq.push(new TreeNode(entry.first, entry.second));
+    }
+
+    // 构建Huffman树
+    while (pq.size() > 1) {
+        TreeNode* left = pq.top();
+        pq.pop();
+        TreeNode* right = pq.top();
+        pq.pop();
+        TreeNode* parent = new TreeNode('$', left->freq + right->freq);
+        parent->left = left;
+        parent->right = right;
+        pq.push(parent);
+    }
+
+    return pq.top(); // Huffman树的根节点
+}
+
+// 生成Huffman编码表
+void generateHuffmanCodes(TreeNode* root, const string& prefix, map<char, string>& huffmanCodes) {
+    if (root == nullptr) {
+        return;
+    }
+
+    if (root->data != '$') {
+        huffmanCodes[root->data] = prefix;
+    }
+
+    generateHuffmanCodes(root->left, prefix + "0", huffmanCodes);
+    generateHuffmanCodes(root->right, prefix + "1", huffmanCodes);
+
+}
+
+// 编码输入字符串
+string encodeString(const string& input, const map<char, string>& huffmanCodes) {
+    string encodedString;
+    for (char c : input) {
+        encodedString += huffmanCodes.at(c);
+    }
+    return encodedString;
+}
+
+// 解码编码后的字符串
+string decodeString(const string& input, TreeNode* root) {
+    string decodedString;
+    TreeNode* current = root;
+    for (char bit : input) {
+        if (bit == '0') {
+            current = current->left;
+        }
+        else {
+            current = current->right;
+        }
+
+        if (current->data != '$') {
+            decodedString += current->data;
+            current = root;
+        }
+    }
+    return decodedString;
+}
+
+int main() {
+    map<char, int> freqMap;
+    ifstream huffmanFile("huffman.huff");
+
+    char ch;
+    int freq;
+    while (huffmanFile >> ch >> freq) {
+        freqMap[ch] = freq;
+    }
+
+    TreeNode* root = buildHuffmanTree(freqMap);
+
+    map<char, string> huffmanCodes;
+    generateHuffmanCodes(root, "", huffmanCodes);
+
+    string command;
+    cin >> command;
+
+    if (command == "enc") {
+        string inputString;
+        cin >> inputString;
+        string encodedString = encodeString(inputString, huffmanCodes);
+        cout << "Average Length is: " << (double)encodedString.size() / inputString.size() << endl;
+        cout << encodedString << endl;
+    }
+    else if (command == "dec") {
+        string inputString;
+        cin >> inputString;
+        string decodedString = decodeString(inputString, root);
+        cout << "Average Length is: " << (double)inputString.size() / decodedString.size() << endl;
+        cout << decodedString << endl;
+    }
+
+    return 0;
+}
