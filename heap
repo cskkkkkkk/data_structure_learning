@@ -1,0 +1,83 @@
+#include<iostream>
+#include<algorithm>
+using namespace std;
+void swap(int* p, int i, int j)
+{
+	int temp;
+	temp = p[i];
+	p[i] = p[j];
+	p[j] = temp;
+}
+struct maxheap
+{
+	int* heap;//存放着堆的数组
+	int size;//在堆里的最大元素数量
+	int n;//目前在堆里有的元素数量
+    
+	int heapsize()
+	{
+		return size;
+	}
+
+	bool isLeaf(int pos)
+	{
+		return (pos >= n / 2) && (pos < n);//这里之所有选择的是n/2是因为n-1的父节点也就是最后一个内节点为n/2-1所以第一个叶子节点也就变成了n/2
+	}
+	int leftchild(int pos)
+	{
+		return 2 * pos + 1;
+	}
+	int rightchild(int pos)
+	{
+		return 2 * pos + 2;
+	}
+	int parent(int pos)
+	{
+		return (pos - 1) / 2;
+	}
+	bool insert(int val)
+	{
+		if (n >= size)
+			return false;
+		int curr = n++;
+		heap[curr] = val;
+		while ((curr != 0) && heap[curr] > heap[parent(curr)])
+		{
+			swap(heap, curr, parent(curr));
+			curr = parent(curr);
+		}
+		return true;
+	}
+
+	void siftdown(int pos)
+	{
+		while (!isLeaf(pos))
+		{
+			int j = leftchild(pos);
+			int rc = rightchild(pos);
+			if (heap[j] < heap[rc])
+				j = rc;
+			if (heap[pos] >= heap[j])return;
+		    swap(heap, j, pos);
+			
+			pos = j;
+		}
+	}
+
+	void buildHeap()
+	{
+		for (int i = n / 2 - 1; i >= 0; i--)
+		{
+			siftdown(i);
+		}
+	}
+
+	bool removemax()
+	{
+		if (n == 0)return false;
+		swap(heap, 0, --n);
+		if (n != 0)
+			siftdown(0);
+		return true;
+	}
+};
