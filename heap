@@ -80,4 +80,20 @@ struct maxheap
 			siftdown(0);
 		return true;
 	}
+
+	bool remove(int pos)
+	{
+		if (pos < 0 || pos >= n)
+		{
+			return false;
+		}
+		swap(heap, pos, --n);
+		while ((heap[pos] > heap[parent(pos)])&&(pos!=0))
+		{
+			swap(heap, pos, parent(pos));
+			pos = parent(pos);
+		}
+		siftdown(pos);
+		return true;
+	}
 };
