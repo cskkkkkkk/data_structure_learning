@@ -1,0 +1,140 @@
+typedef struct BiNode
+{
+	int data;
+	struct BiNode* lchild, * rchild;
+
+}BiNode, * BiTree;
+void insertBST(BiTree& T, int key)
+{
+	if (NULL == T)
+	{
+		T = new BiNode;
+		T->data = key;
+		T->lchild = T->rchild = NULL;
+	}
+	else if (T->data > key)
+	{
+		insertBST(T->lchild, key);
+	}
+	else
+	{
+		insertBST(T->rchild, key);
+	}
+};
+void createBST(BiTree& T, int val)
+{
+	insertBST(T, val);
+}
+//前序遍历并打印
+void preOrderTraverse(BiTree T)
+{
+	if (T == NULL)
+		return;
+	cout << T->data << " ";
+	preOrderTraverse(T->lchild);
+	preOrderTraverse(T->rchild);
+
+}
+
+//返回二叉树的高度
+
+int height(BiTree T)
+{
+	if (T == NULL)
+		return 0;
+	int layer1 = 1;
+	return layer1 + max(height(T->lchild), height(T->rchild));
+}
+
+int layer = 0;
+//查找函数返回是否查找到数据并且可以确定查找元素的层数
+bool searchBST(BiTree& T, int key)
+{
+	layer++;
+	if (T == NULL)
+		return false;
+	else
+	{
+		if (key == T->data)
+		{
+			return true;
+		}
+		else if (key < T->data)
+			searchBST(T->lchild, key);
+		else
+		{
+			searchBST(T->rchild, key);
+		}
+	}
+}
+//利用上面查找函数实现查找操作
+void finBST(BiTree& T)
+{
+	int k;
+	cin >> k;
+	if (searchBST(T, k))
+	{
+		cout << "查找成功" << endl;
+		cout << "层数为：" << layer << endl;
+	}
+	else
+	{
+		cout << "没有查找到该元素" << endl;
+	}
+}
+
+//定义删除节点的函数
+void deletenode(BiTree& p)
+{
+	BiTree q, s;
+	//没有左孩子
+	if (!p->lchild)
+	{
+		q= p;
+		p = p->rchild;
+		delete q;
+	}
+	//没有右孩子
+	if (!p->rchild)
+	{
+		q = p;
+		p = p->lchild;
+		delete q;
+	}
+	else
+	{
+		q = p;
+		s = p->lchild;
+		while (s->rchild)
+		{
+			q = s;
+			s = s->rchild;
+
+		}
+		p->data = s->data;
+		if (q != p)
+		{
+			q->rchild = s->lchild;
+		}
+		else
+		{
+			q->lchild = s->lchild;
+		}
+		delete s;
+	}
+}
+//删除操作
+bool deleteBST(BiTree& T, int del)
+{
+	if (!T)
+		return false;
+	else
+	{
+		if (del == T->data)
+			deletenode(T);
+		else if (del < T->data)
+			return deleteBST(T->lchild, del);
+		else
+			return deleteBST(T->rchild, del);
+	}
+}
